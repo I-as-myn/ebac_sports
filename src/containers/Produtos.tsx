@@ -1,42 +1,47 @@
-import { Produto as ProdutoType } from '../App'
+// containers/Produtos.tsx
+import React from 'react'
 import Produto from '../components/Produto'
-
 import * as S from './styles'
+import { useDispatch, useSelector } from 'react-redux'
+import { useGetProdutosQuery } from '../store/reducers/produtosApi'
+import { adicionarAoCarrinho } from '../store/reducers/carrinhoSlice'
+import { adicionarOuRemoverFavorito } from '../store/reducers/favoritosSlice'
+import { RootState } from '../store'
 
-type Props = {
-  produtos: ProdutoType[]
-  favoritos: ProdutoType[]
-  adicionarAoCarrinho: (produto: ProdutoType) => void
-  favoritar: (produto: ProdutoType) => void
-}
+import { ProdutoType } from '../components/Produto'
 
-const ProdutosComponent = ({
-  produtos,
-  favoritos,
-  adicionarAoCarrinho,
-  favoritar
-}: Props) => {
-  const produtoEstaNosFavoritos = (produto: ProdutoType) => {
-    const produtoId = produto.id
-    const IdsDosFavoritos = favoritos.map((f) => f.id)
+const ProdutosComponent: React.FC = () => {
+  const dispatch = useDispatch()
+  const favoritos = useSelector((state: RootState) => state.favoritos.itens)
+  const { data: produtos, isLoading } = useGetProdutosQuery()
 
-    return IdsDosFavoritos.includes(produtoId)
+  const produtoEstaNosFavoritos = (produtoId: number) =>
+    favoritos.some((fav) => fav.id === produtoId)
+
+  const handleAdicionarAoCarrinho = (produto: ProdutoType) => {
+    dispatch(adicionarAoCarrinho(produto))
+  }
+
+  const handleFavoritar = (produto: ProdutoType) => {
+    dispatch(adicionarOuRemoverFavorito(produto))
+  }
+
+  if (isLoading) {
+    return <p>Carregando produtos...</p>
   }
 
   return (
-    <>
-      <S.Produtos>
-        {produtos.map((produto) => (
-          <Produto
-            estaNosFavoritos={produtoEstaNosFavoritos(produto)}
-            key={produto.id}
-            produto={produto}
-            favoritar={favoritar}
-            aoComprar={adicionarAoCarrinho}
-          />
-        ))}
-      </S.Produtos>
-    </>
+    <S.Produtos>
+      {produtos?.map((produto: ProdutoType) => (
+        <Produto
+          key={produto.id}
+          produto={produto}
+          aoComprar={handleAdicionarAoCarrinho}
+          favoritar={handleFavoritar}
+          estaNosFavoritos={produtoEstaNosFavoritos(produto.id)}
+        />
+      ))}
+    </S.Produtos>
   )
 }
 

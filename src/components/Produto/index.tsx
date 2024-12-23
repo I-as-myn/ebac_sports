@@ -1,5 +1,12 @@
-import { Produto as ProdutoType } from '../../App'
+import React from 'react'
 import * as S from './styles'
+
+export type ProdutoType = {
+  id: number
+  nome: string
+  preco: number
+  imagem: string
+}
 
 type Props = {
   produto: ProdutoType
@@ -13,12 +20,12 @@ export const paraReal = (valor: number) =>
     valor
   )
 
-const ProdutoComponent = ({
+const ProdutoComponent: React.FC<Props> = ({
   produto,
   aoComprar,
   favoritar,
   estaNosFavoritos
-}: Props) => {
+}) => {
   return (
     <S.Produto>
       <S.Capa>
